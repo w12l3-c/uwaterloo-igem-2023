@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from scipy.integrate import odeint, solve_ivp
 from scipy.optimize import minimize
 from tqdm import tqdm
+import math
 
 class SIRmodel:
     def __init__(self, N, I0, R0, S0, Rn, beta, gamma, days):
@@ -68,7 +69,7 @@ class SIRmodel:
         plt.show(block=True)
 
     ## Monte Carlo Simulation
-    def monteCarlo(self, num_simulations):
+    def monteCarlo(self, num_simulations = 9):
         self.results = []
         self.num_simulations = num_simulations
         for _ in tqdm(range(num_simulations)):
@@ -77,8 +78,17 @@ class SIRmodel:
             R = [self.R0]
             t = [0]
 
+            # Randomness Event
+            # self.beta = np.random.normal(0.5, 0.1)
+            # self.gamma = np.random.normal(0.1, 0.01)
+            # threshold = 8
+
             for day in tqdm(range(self.days)):
                 new_infected = np.random.binomial(S[-1], self.beta * I[-1] / self.N)
+                # if new_infected > threshold:
+                #     new_infected = threshold
+                #     threshold = np.randint(1, 10)
+
                 new_recovered = np.random.binomial(I[-1], self.gamma)
 
                 S.append(S[-1] - new_infected)
@@ -89,16 +99,24 @@ class SIRmodel:
             self.results.append((S, I, R, t))
 
     def plotMonteCarlo(self):
-        fig, ax = plt.subplots(self.num_simulations, sharex=True, sharey=True)
+        fig, ax = plt.subplots(3, 3, figsize=(15, 8))
+        if self.num_simulations > 9:
+            fig, ax = plt.subplots(int(math.ceil(self.num_simulations//3)), 3, figsize=(15, 8))
+        
         for i, result in enumerate(self.results):
             S, I, R, t = result
-            y = np.vstack([I/self.ratio, S/self.ratio, R/self.ratio])
+            y = np.vstack([I, S, R])
             labels = ['Infected', 'Suspectible', 'Recovered']
             color_map = ["#db1d0f", "#0e85ed", "#19e653"]
-            ax[i].stackplot(t, y, labels=labels, colors=color_map)
+            j = i // 3
+            k = i % 3
+            ax[j, k].set_title(f'beta:{self.beta:.2f} | gamma:{self.gamma:.4f}')
+            ax[j, k].stackplot(t, y, labels=labels, colors=color_map)
             fig.suptitle(f'Monte Carlo Sim for TSWV')
-            ax[i].set_xlabel('Time in days')
-            ax[i].set_ylabel(f'Population in {self.ratio:.0f}s')
+            ax[j, k].set_xlabel('Time in days')
+            ax[j, k].set_ylabel(f'Population')
+            # ax[0].legend(loc='upper left')
+        plt.subplots_adjust(hspace=0.5)
         plt.show(block=True)
             
 # I'll add PTI and ETI later as it is correlated with the iRNA and lab
@@ -128,4 +146,10 @@ if __name__ == '__main__':
 
         beta += 0.1
         gamma /= 10
-        
+    
+    print("How many sims do you want to run (default 9)?")
+    trails = int(input("Enter a number:"))
+
+    TSWV = SIRmodel(N=N, I0=I0, R0=R0, S0=S0, Rn=Rn, beta=0.4, gamma=0.05, days=80)
+    TSWV.monteCarlo(trails)
+    TSWV.plotMonteCarlo()
