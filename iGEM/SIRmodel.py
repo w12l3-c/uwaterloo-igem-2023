@@ -4,6 +4,7 @@ from scipy.integrate import odeint, solve_ivp
 from scipy.optimize import minimize
 from tqdm import tqdm
 import math
+from ETImodel import ETImodel
 
 class SIRmodel:
     def __init__(self, N, I0, R0, S0, Rn, beta, gamma, days):
@@ -21,9 +22,10 @@ class SIRmodel:
         self.gamma = gamma  # mean recovery rate, gamma, (in 1/days).
         self.days = days
         
-        self.t_span = (0, days)
+        self.t_span = (0, days) # (start, max days)
         self.t_eval = [x for x in range(days+1)]
         self.t = np.linspace(0, days, days) # (0, amount of days, steps)
+        self.endtime = days
         self.y0 = S0, I0, R0
 
         if self.N >= 1e8:
@@ -47,11 +49,16 @@ class SIRmodel:
         self.RnCheck.append(self.Rt)
         return self.dSdt, self.dIdt, self.dRdt
 
+    def termination(self, t, y):
+        return y[1] - 0 < 0.01 or y[1] - self.N < 0.01  # Terminate when I = 0 or I = N
+
     def ode(self):
         self.S, self.I, self.R = odeint(self.deriv, self.y0, self.t, args=(self.N, self.beta, self.gamma)).T
-        print(self.RnCheck[-5:-1])
-        # t_span = self.t_span
-        # solution = solve_ivp(self.deriv, t_span, self.y0, method='RK45', t_eval=self.t_eval, args=(self.N, self.beta, self.gamma))
+        # print(self.RnCheck[-5:-1])
+
+        # solution = solve_ivp(self.deriv, self.t_span, self.y0, args=(self.N, self.beta, self.gamma), events=self.termination)
+        # print(solution)
+        # self.endtime = solution.t
         # self.S, self.I, self.R = solution.y
         
     def plotSIR(self):
@@ -59,18 +66,21 @@ class SIRmodel:
         fig, ax = plt.subplots()
         labels = ['Infected', 'Suspectible', 'Recovered']
         color_map = ["#db1d0f", "#0e85ed", "#19e653"]
+        # ax.stackplot(self.t, y, labels=labels, colors=color_map)
         ax.stackplot(self.t, y, labels=labels, colors=color_map)
         ax.set_title(f'SIR Model for TSWV with Transmit Rate of {self.beta:.2f} and Recovery Rate of {self.gamma:.4f}')
         ax.set_xlabel('Time in days')
         ax.set_ylabel(f'Population in {self.ratio:.0f}s')
         ax.set_ylim(0,self.N/self.ratio)
         ax.set_xlim(0,self.days)
+        # ax.set_xlim(0, self.endtime[-1])
         ax.legend(loc='upper left')
         plt.show(block=True)
 
     ## Monte Carlo Simulation
     def monteCarlo(self, num_simulations = 9):
         self.results = []
+        self.hyperparameters = []
         self.num_simulations = num_simulations
         for _ in tqdm(range(num_simulations)):
             S = [self.S0]
@@ -79,15 +89,16 @@ class SIRmodel:
             t = [0]
 
             # Randomness Event
-            # self.beta = np.random.normal(0.5, 0.1)
-            # self.gamma = np.random.normal(0.1, 0.01)
+            self.beta = max(0.05, min(1.0, np.random.normal(0.525, 0.15)))
+            self.gamma = max(0.1, min(0.2, np.random.normal(0.15, 0.025)))
+        
             # threshold = 8
 
             for day in tqdm(range(self.days)):
                 new_infected = np.random.binomial(S[-1], self.beta * I[-1] / self.N)
                 # if new_infected > threshold:
                 #     new_infected = threshold
-                #     threshold = np.randint(1, 10)
+                #     threshold = np.random.randint(1, 10)
 
                 new_recovered = np.random.binomial(I[-1], self.gamma)
 
@@ -97,6 +108,7 @@ class SIRmodel:
                 t.append(day + 1)
             
             self.results.append((S, I, R, t))
+            self.hyperparameters.append((self.beta, self.gamma))
 
     def plotMonteCarlo(self):
         fig, ax = plt.subplots(3, 3, figsize=(15, 8))
@@ -105,12 +117,13 @@ class SIRmodel:
         
         for i, result in enumerate(self.results):
             S, I, R, t = result
+            beta, gamma = self.hyperparameters[i]
             y = np.vstack([I, S, R])
             labels = ['Infected', 'Suspectible', 'Recovered']
             color_map = ["#db1d0f", "#0e85ed", "#19e653"]
             j = i // 3
             k = i % 3
-            ax[j, k].set_title(f'beta:{self.beta:.2f} | gamma:{self.gamma:.4f}')
+            ax[j, k].set_title(f'beta:{beta:.2f} | gamma:{gamma:.4f}')
             ax[j, k].stackplot(t, y, labels=labels, colors=color_map)
             fig.suptitle(f'Monte Carlo Sim for TSWV')
             ax[j, k].set_xlabel('Time in days')
