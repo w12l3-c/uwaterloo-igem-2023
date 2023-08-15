@@ -6,7 +6,7 @@ import sklearn
 
 # ==================== Constants ==================== #
 TIME_STEP = 1 # minute
-TOTAL_TIME = 100 # minute
+TOTAL_TIME = 10 # minute
 
 INITIAL_MS_CONCENTRATION = 1.0 # cells/µL (unit TBD)
 MS_BREAKDOWN_RATE = 0.1 # 1/min
@@ -43,6 +43,8 @@ def create_RISC(siRNA_concentration):
         siRNA_concentration -= RISC_FORMATION_RATE * siRNA_concentration
     return RISC_concentration, siRNA_concentration
 
+RISC_stack = []
+free_mRNA_concentration_stack = []
 
 for min in range(1, TOTAL_TIME+1, TIME_STEP):
     ms_concentration -= MS_BREAKDOWN_RATE * ms_concentration 
@@ -69,6 +71,17 @@ for min in range(1, TOTAL_TIME+1, TIME_STEP):
     print("Minute: ", min)
     print("RISC: ", RISC_concentration)
     print("mRNA: ", free_mRNA_concentration)
+
+    RISC_stack.append(RISC_concentration)
+    free_mRNA_concentration_stack.append(free_mRNA_concentration)
+
+# ==================== Plotting ==================== #
+plt.plot(range(1, TOTAL_TIME+1, TIME_STEP), RISC_stack, label="RISC")
+plt.plot(range(1, TOTAL_TIME+1, TIME_STEP), free_mRNA_concentration_stack, label="mRNA")
+plt.xlabel("Time (min)")
+plt.ylabel("Concentration (cells/µL)")
+plt.title("Stochastic Model of Minicell Formation")
+plt.show(block=True)
             
         
 
