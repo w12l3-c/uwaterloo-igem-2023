@@ -5,7 +5,8 @@ import sklearn
 import random
 
 # ==================== Variables ==================== #
-ecoli_with_ds = 1000
+ml = 500
+ecoli_with_ds = 500 * ml    # cells/ml
 ecoli_with_ds_replicate = 0
 minicell = 0
 dsRNA = 0
