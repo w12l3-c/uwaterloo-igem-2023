@@ -3,7 +3,6 @@ import matplotlib.pyplot as plt
 from scipy.integrate import odeint
 from scipy.optimize import minimize
 import pandas as pd
-import seaborn as sb
 import datetime
 from matplotlib.animation import FuncAnimation
 
