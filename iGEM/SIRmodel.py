@@ -13,8 +13,8 @@ class SIRmodel:
         self.R0 = R0    # Initial Recovered Population
         self.S0 = S0    # Initial Suspectible Population
         
-        self.Rn = Rn            # Base Secondary Infection Rn > 1 -> Create more infections
-        self.Rt = 0             # Real-time Secondary Infection
+        self.Rn = Rn    # Base Secondary Infection Rn > 1 -> Create more infections
+        self.Rt = 0     # Real-time Secondary Infection
         # self.R_exp = beta/gamma # Expected Secondary Infection
         self.RnCheck = []
         
