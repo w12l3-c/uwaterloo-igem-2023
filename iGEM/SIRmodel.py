@@ -152,7 +152,7 @@ class SIRmodel:
         plt.legend(loc='upper left')
         
         self.ani = FuncAnimation(self.fig, self.update_plot, frames=len(t), blit=True)
-        plt.show(blocj=True)
+        plt.show(block=True)
 
     def update_plot(self, frame):
         for i, line in enumerate(self.lines):
