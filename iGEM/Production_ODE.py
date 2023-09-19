@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.integrate import solve_ivp
 
-# Define ODEs
+
 def system(t, y, ecoli_uptake_rate, minicell_formation_rate):
     ecoli, dsRNA, minicell = y
     
@@ -25,16 +25,13 @@ minicell_0 = 0
 
 y0 = [ecoli_0, dsRNA_0, minicell_0]
 
-# Time span
 t_span = (0, 100)
 
-# Solve ODEs
 solution = solve_ivp(system, t_span, y0, args=(ecoli_uptake_rate, minicell_formation_rate))
 
-# Calculate free dsRNA concentration
 free_dsRNA = solution.y[1] - solution.y[2]
 
-# Plot results
+
 plt.plot(solution.t, solution.y[0], label="E. coli")
 plt.plot(solution.t, free_dsRNA, label="Free dsRNA")
 plt.plot(solution.t, solution.y[2], label="Minicell")

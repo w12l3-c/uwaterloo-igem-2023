@@ -8,8 +8,8 @@ import sklearn
 TIME_STEP = 1 # minute
 TOTAL_TIME = 10 # minute
 
-INITIAL_MS_CONCENTRATION = 1.0 # cells/µL (unit TBD)
-MS_BREAKDOWN_RATE = 0.1 # 1/min
+INITIAL_MC_CONCENTRATION = 1.0 # cells/µL (unit TBD)
+MC_BREAKDOWN_RATE = 0.1 # 1/min
 
 RISC_FORMATION_RATE = 1 # 1/min
 INITIAL_RISC_CONCENTRATION = 0.0 # cells/µL
@@ -28,14 +28,13 @@ PROBABILITY_OF_INTERFERENCE = 0.5 # Inference probability of RISC and viral mRNA
 # rn assume dsRNA -> Dicer -> siRNA is instantaneous
 
 # ==================== Variables ==================== #
-ms_concentration = INITIAL_MS_CONCENTRATION
+mc_concentration = INITIAL_MC_CONCENTRATION
 
 free_RISC_concentration = INITIAL_RISC_CONCENTRATION
 occupied_RISC_concentration = 0.0   
 
 free_mRNA_concentration = INITIAL_MRNA_CONCENTRATION
 occupied_mRNA_concentration = 0.0
-
 
 def create_RISC(siRNA_concentration):
     if siRNA_concentration > 0:
@@ -47,8 +46,8 @@ RISC_stack = []
 free_mRNA_concentration_stack = []
 
 for min in range(1, TOTAL_TIME+1, TIME_STEP):
-    ms_concentration -= MS_BREAKDOWN_RATE * ms_concentration 
-    dsRNA_concentration = INITIAL_MS_CONCENTRATION - ms_concentration
+    mc_concentration -= MC_BREAKDOWN_RATE * mc_concentration 
+    dsRNA_concentration = INITIAL_MC_CONCENTRATION - mc_concentration
     dicer_concentration = dsRNA_concentration   # TBD
     siRNA_concentration = dicer_concentration   # TBD
 
@@ -81,6 +80,7 @@ plt.plot(range(1, TOTAL_TIME+1, TIME_STEP), free_mRNA_concentration_stack, label
 plt.xlabel("Time (min)")
 plt.ylabel("Concentration (cells/µL)")
 plt.title("Stochastic Model of Minicell Formation")
+
 plt.show(block=True)
             
         
