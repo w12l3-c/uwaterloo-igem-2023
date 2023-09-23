@@ -23,15 +23,16 @@ class SIRmodel:
         self.delta = delta   # death rate, delta, (in 1/days).
         self.days = days
         
-        self.t_span = (0, days) # (start, max days)
-        self.t_eval = [x for x in range(days)]
-        self.t = np.linspace(0, days, days) # (0, amount of days, steps)
-        self.endtime = days
-        self.y0 = S0, I0, R0, D0
+        self.t_span = (0, days)                 # (start, max days)
+        self.t_eval = [x for x in range(days)]  # list of the days
+        self.t = np.linspace(0, days, days)     # (0, amount of days, steps)
+        self.endtime = days                     # endtime
+        self.y0 = S0, I0, R0, D0                # Initial conditions vector
 
-        self.fig, self.ax = plt.subplots()
+        self.fig, self.ax = plt.subplots()      # Create a figure and an axes.
         self.lines = []
 
+        # Ratio for population
         if self.N >= 1e8:
             self.ratio = 1e6
         elif self.N >= 1e5:
@@ -43,13 +44,15 @@ class SIRmodel:
     def deriv(self, y, t, N, beta, gamma, delta):
         S, I, R, D = y
         self.Rt = self.Rn * S
-        self.dSdt = -beta * S * I / N  
         # Maximum number of infected people is when Rt = 1
         # Rt > 1 -> Increase Infected, Rt < 1 -> Decrease Infected
         # self.dIdt = gamma * I * (self.Rt - 1) / N
-        self.dIdt = beta * S * I / N - gamma * I - delta * I
-        self.dRdt = gamma * I 
-        self.dDdt = delta * I
+
+        # The Differentials
+        self.dSdt = -beta * S * I / N                           # Suspectible population
+        self.dIdt = beta * S * I / N - gamma * I - delta * I    # Infected population
+        self.dRdt = gamma * I                                   # Recovered population
+        self.dDdt = delta * I                                   # Dead population
 
         self.d2Idt2 = pow(gamma, 2) * pow((self.Rt - 1), 2) * I - gamma * beta * self.Rt * pow(I, 2) - gamma * I  
         self.RnCheck.append(self.Rt)
@@ -60,9 +63,12 @@ class SIRmodel:
         return y[1] - 0 < 0.01 or y[1] - self.N < 0.01  # Terminate when I = 0 or I = N
 
     def ode(self):
+        # Running the ODE solver with the deriv function
         self.S, self.I, self.R, self.D = odeint(self.deriv, self.y0, self.t, args=(self.N, self.beta, self.gamma, self.delta)).T
         
     def plotSIR(self):
+        # This one kind of unused now because it only display one iteration of ODE
+        # It only works when the recovery, infection and death rates are determined
         y = np.vstack([self.D/self.ratio, self.I/self.ratio, self.S/self.ratio, self.R/self.ratio])
         fig, ax = plt.subplots()
         labels = ['Deceased', 'Infected', 'Suspectible', 'Recovered']
@@ -96,6 +102,7 @@ class SIRmodel:
             self.gamma = max(0.1, min(0.2, np.random.normal(0.15, 0.025)))
             self.delta = max(0.01, min(0.05, np.random.normal(0.03, 0.01)))
 
+            # Mimic SIR but the rates are randomized
             for day in range(self.days):
                 new_infected = np.random.binomial(S[-1], self.beta * I[-1] / self.N)
                 new_recovered = np.random.binomial(I[-1], self.gamma)
@@ -119,14 +126,16 @@ class SIRmodel:
             # Randomness Event
             self.beta = np.random.uniform(0.5, 1.0)
             self.gamma = np.random.uniform(0, 0.2)
-            self.delta = np.random.uniform(0, 0.025)
+            self.delta = np.random.uniform(0, 1/21)
 
             self.hyperparameters.append((self.beta, self.gamma, self.delta))
 
+            # Run the ODE solver with the deriv function
             self.y0 = self.S0, self.I0, self.R0, self.D0
             S, I, R, D = odeint(self.deriv, self.y0, self.t, args=(self.N, self.beta, self.gamma, self.delta)).T
             self.results.append((S, I, R, D, np.array(self.t_eval)))
 
+    # Plot the Monte Carlo Simulation
     def plotMonteCarlo(self):
         self.results = np.array(self.results)
         self.hyperparameters = np.array(self.hyperparameters)
@@ -137,12 +146,16 @@ class SIRmodel:
         self.mean_hyperparameters = np.mean(self.hyperparameters, axis=0)
         self.std_hyperparameters = np.std(self.hyperparameters, axis=0)
 
+        # Extract all the arrays from the mean_results, mean_hyperparameters
         S, I, R, D, t = self.mean_results
         beta, gamma, delta = self.mean_hyperparameters
+        # Calculate the R0 
         R0 = beta / gamma
 
+        # Print the results
         print(f"Suspectible:{S[:-1][:-1]} | Infected:{I[:-1][:-1]} | Recovered:{R[:-1][:-1]} | Deceased:{D[:-1][:-1]}")
 
+        # Plot the results
         y = np.vstack([D, I, S, R])
         labels = ['Deceased', 'Infected', 'Suspectible', 'Recovered']
         color_map = ["#808080", "#db1d0f", "#0e85ed", "#19e653"]
@@ -152,9 +165,11 @@ class SIRmodel:
         plt.ylabel(f'Population')
         plt.legend(loc='upper left')
 
+        # Animation (Currently not working)
         self.ani = FuncAnimation(self.fig, self.update_plot, frames=len(t), blit=True)
         plt.show(block=True)
 
+    # Update the plot for animation
     def update_plot(self, frame):
         for i, line in enumerate(self.lines):
             line.set_data(self.mean_results[3][:frame], self.mean_results[i][:frame])
@@ -178,6 +193,6 @@ if __name__ == '__main__':
     print("How many sims do you want to run (default 100)?")
     trails = int(input("Enter a number:"))
 
-    TSWV = SIRmodel(N=N, I0=I0, R0=R0, S0=S0, Rn=Rn, beta=0.4, gamma=0.05, delta=0.01, days=100)
+    TSWV = SIRmodel(N=N, I0=I0, R0=R0, S0=S0, Rn=Rn, beta=0.4, gamma=0.05, delta=1/21, days=100)
     TSWV.monteCarlo2(trails)
     TSWV.plotMonteCarlo()
