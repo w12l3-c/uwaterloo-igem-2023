@@ -152,8 +152,9 @@ class SIRmodel:
         # Calculate the R0 
         R0 = beta / gamma
 
+        print(type(S))
         # Print the results
-        print(f"Suspectible:{S[:-1][:-1]} | Infected:{I[:-1][:-1]} | Recovered:{R[:-1][:-1]} | Deceased:{D[:-1][:-1]}")
+        print(f"Suspectible:{S[-1]:.0f} | Infected:{I[-1]:.0f} | Recovered:{R[-1]:.0f} | Deceased:{D[-1]:.0f}")
 
         # Plot the results
         y = np.vstack([D, I, S, R])
