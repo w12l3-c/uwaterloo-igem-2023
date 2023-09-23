@@ -167,14 +167,31 @@ class SIRmodel:
         plt.legend(loc='upper left')
 
         # Animation (Currently not working)
-        self.ani = FuncAnimation(self.fig, self.update_plot, frames=len(t), blit=True)
+        # self.animateMonteCarlo(S, I, R, D, t, beta, gamma, delta, R0, labels, color_map)
         plt.show(block=True)
 
     # Update the plot for animation
-    def update_plot(self, frame):
-        for i, line in enumerate(self.lines):
-            line.set_data(self.mean_results[3][:frame], self.mean_results[i][:frame])
-        return self.lines
+    def animateMonteCarlo(self, S, I, R, D, t, beta, gamma, delta, R0, labels, color_map):
+        fig, ax = plt.subplots()
+        ax.set_title(f'Monte Carlo Sim for TSWV with {self.num_simulations} simulations \nBeta:{beta:.2f} | Gamma:{gamma:.4f} | Delta:{delta:.4f} | R0:{R0:.2f}')
+        ax.set_xlabel('Time (days)')
+        ax.set_ylabel(f'Population')
+        
+        population = np.vstack([D, I, S, R])
+
+        stacks, = ax.stackplot([], [[]*4], labels=labels, colors=color_map)
+        ax.legend(loc='upper left')
+
+        def animate(i):
+            for stack, data_layer in zip(stacks, population):
+                stack.set_x(t[:i])
+                stack.set_y(data_layer[:i])
+            return stacks
+
+        anim = FuncAnimation(fig, animate, frames=len(t), interval=20, blit=True)
+        
+        plt.show(block=True)
+        anim.save('SIRmodel.gif', writer='imagemagick')
 
 
 if __name__ == '__main__':
