@@ -124,9 +124,9 @@ class SIRmodel:
         self.num_simulations = num_sim
         for _ in tqdm(range(num_sim)):
             # Randomness Event
-            self.beta = np.random.uniform(0.04, 0.25)
-            self.gamma = np.random.uniform(0, 0.05)
-            self.delta = np.random.uniform(0, 1/21)
+            self.beta = np.random.uniform(0.04, 0.25)   # Range of values used in thrips transmission papers
+            self.gamma = np.random.uniform(0, 0.05)     # Recovery rate
+            self.delta = np.random.uniform(0, 1/21)     # Death rate base on avg incubation period of 21 days
 
             self.hyperparameters.append((self.beta, self.gamma, self.delta))
 
