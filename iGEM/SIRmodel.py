@@ -160,7 +160,7 @@ class SIRmodel:
         y = np.vstack([D, I, S, R])
         labels = ['Deceased', 'Infected', 'Suspectible', 'Recovered']
         color_map = ["#808080", "#db1d0f", "#0e85ed", "#19e653"]
-        plt.title(f'Monte Carlo Sim for TSWV with {self.num_simulations} simulations \nBeta:{beta:.2f} | Gamma:{gamma:.4f} | Delta:{delta:.4f} | R0:{R0:.2f}')
+        plt.title(f'Monte Carlo Sim for TSWV with {self.num_simulations} simulations \nBeta:{beta:.4f} | Gamma:{gamma:.4f} | Delta:{delta:.4f} | R0:{R0:.2f}')
         plt.stackplot(t, y, labels=labels, colors=color_map)
         plt.xlabel('Time (days)')
         plt.ylabel(f'Population')
@@ -169,6 +169,18 @@ class SIRmodel:
         # Animation (Currently not working)
         # self.animateMonteCarlo(S, I, R, D, t, beta, gamma, delta, R0, labels, color_map)
         plt.show(block=True)
+
+        # Line plot
+        plt.plot(t, S, label='Suspectible', color='blue')
+        plt.plot(t, I, label='Infected', color='red')
+        plt.plot(t, R, label='Recovered', color='green')
+        plt.plot(t, D, label='Deceased', color='grey')
+        plt.xlabel('Time (days)')
+        plt.ylabel(f'Population')
+        plt.legend(loc='upper left')
+        plt.title(f'Monte Carlo Sim for TSWV with {self.num_simulations} simulations \nBeta:{beta:.4f} | Gamma:{gamma:.4f} | Delta:{delta:.4f} | R0:{R0:.2f}')
+        plt.show(block=True)
+
 
     # Update the plot for animation
     def animateMonteCarlo(self, S, I, R, D, t, beta, gamma, delta, R0, labels, color_map):
@@ -211,6 +223,6 @@ if __name__ == '__main__':
     print("How many sims do you want to run (default 100)?")
     trails = int(input("Enter a number:"))
 
-    TSWV = SIRmodel(N=N, I0=I0, R0=R0, S0=S0, Rn=Rn, beta=0.4, gamma=0.07, delta=1/21, days=100)
+    TSWV = SIRmodel(N=N, I0=I0, R0=R0, S0=S0, Rn=Rn, beta=0.4, gamma=0.07, delta=1/21, days=500)
     TSWV.monteCarlo2(trails)
     TSWV.plotMonteCarlo()
