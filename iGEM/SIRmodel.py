@@ -124,8 +124,8 @@ class SIRmodel:
         self.num_simulations = num_sim
         for _ in tqdm(range(num_sim)):
             # Randomness Event
-            self.beta = np.random.uniform(0.5, 1.0)
-            self.gamma = np.random.uniform(0, 0.2)
+            self.beta = np.random.uniform(0.04, 0.25)
+            self.gamma = np.random.uniform(0, 0.05)
             self.delta = np.random.uniform(0, 1/21)
 
             self.hyperparameters.append((self.beta, self.gamma, self.delta))
@@ -211,6 +211,6 @@ if __name__ == '__main__':
     print("How many sims do you want to run (default 100)?")
     trails = int(input("Enter a number:"))
 
-    TSWV = SIRmodel(N=N, I0=I0, R0=R0, S0=S0, Rn=Rn, beta=0.4, gamma=0.05, delta=1/21, days=100)
+    TSWV = SIRmodel(N=N, I0=I0, R0=R0, S0=S0, Rn=Rn, beta=0.4, gamma=0.07, delta=1/21, days=100)
     TSWV.monteCarlo2(trails)
     TSWV.plotMonteCarlo()
