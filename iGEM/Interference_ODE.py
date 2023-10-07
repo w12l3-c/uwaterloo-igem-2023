@@ -9,7 +9,7 @@ def system(t, y, dicer_processing_rate, risc_formation_rate, risc_degradation_ra
     d_dsRNA = -dicer_processing_rate * dsRNA
     d_siRNA = dicer_processing_rate * dsRNA - risc_formation_rate * siRNA
     d_risc_complex = risc_formation_rate * siRNA - risc_degradation_rate * risc_complex
-    
+    print(t)
     return [d_dsRNA, d_siRNA, d_risc_complex]
 
 # Parameters
