@@ -1,0 +1,27 @@
+a = 10; b = 0.001; h = 1000; g = 1; Subscript[d, m] = 1; Subscript[d, \
+r] = 0.1; n = 32; Subscript[d, c] = 1;
+
+s1 = NDSolve[{d'[t] == -a *d[t] + g *c[t], 
+    r'[t] == a n d[t] - Subscript[d, r]* r[t] - b r[t] m[t], 
+    c'[t] == b r[t] m[t] - (g + Subscript[d, c])*c[t], 
+    m'[t] == h - Subscript[d, m]*m[t] - b r[t] m[t], m[0] == 1000, 
+    r[0] == 0, c[0] == 0, d[0] == 10}, {d, r, c, m}, {t, 0, 30}];
+
+LogPlot[{Evaluate[d[x] /. s1], Evaluate[r[x] /. s1], 
+  Evaluate[c[x] /. s1], Evaluate[m[x] /. s1]}, {x, 0, 30}, 
+ PlotRange -> {Automatic, {0.01, 10^6}}, 
+ PlotLabels -> {"dsRNA", "pre-RISC", "RISC-mRNA", "mRNA"}, 
+ AxesLabel -> {"Time (hours)", "Concentration"}]
+
+
+s2 = NDSolve[{d'[t] == -a *d[t] + g *c[t], 
+    r'[t] == a n d[t] - Subscript[d, r]* r[t] - b r[t] m[t], 
+    c'[t] == b r[t] m[t] - (g + Subscript[d, c])*c[t], 
+    m'[t] == h - Subscript[d, m]*m[t] - b r[t] m[t], m[0] == 1000, 
+    r[0] == 0, c[0] == 0, d[0] == 1000}, {d, r, c, m}, {t, 0, 30}];
+
+LogPlot[{Evaluate[d[x] /. s2], Evaluate[r[x] /. s2], 
+  Evaluate[c[x] /. s2], Evaluate[m[x] /. s2]}, {x, 0, 30}, 
+ PlotRange -> {Automatic, {0.01, 10^6}}, 
+ PlotLabels -> {"dsRNA", "pre-RISC", "RISC-mRNA", "mRNA"}, 
+ AxesLabel -> {"Time (hours)", "Concentration"}]
