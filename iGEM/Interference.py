@@ -17,8 +17,8 @@ time = 500
 time_step = 1
 min = 0
 
-limit = 1e10
-limit_tswv = 1e10
+limit = 1e11
+limit_tswv = 1e15
 
 start_infection = 0 # RISC will only start increasing after virus infection
 
@@ -68,6 +68,9 @@ def interference_ode(t, y, e_g, e_d, d_g, d_d, s_d, t_g, rt):
             d_tswv = (t_g * tswv - half_life * tswv - risc * tswv_2_risc * 1.001) #* (1 - (tswv/limit_tswv))
     else:
         d_tswv = 0     
+
+    if tswv < 0:
+        d_tswv = 0
     
     return [d_ecoli, d_dsRNA, d_siRNA, d_risc, d_tswv]
 
