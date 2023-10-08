@@ -17,6 +17,11 @@ python3 prod-ode.py             # for part 1
 python3 interference.py         # for part 2
 ```
 
+## Results
+### Part 1
+
+
+### Part 2
 
 
 Contributers: Aaren, Utkarsh, Wallace, Max
