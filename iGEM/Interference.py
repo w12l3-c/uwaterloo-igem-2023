@@ -28,9 +28,9 @@ ecoli_degrade_rate = np.log(2)/6    # half life of 6 minutes convert to day
 ecoli2dsRNA_percent = 0.05
 dsRNA2siRNA_percent = 0.95
 siRNA2risc_percent = 1.0 
-tswv_replicate_rate = np.random.uniform(0.1, 1)
+tswv_replicate_rate = np.random.uniform(1, 1.5)
 tswv_replicate_rate = 1.2
-risc_tswv_degrade_percent = 0.0000001
+risc_tswv_degrade_percent = 1.000
 
 # Stacks
 ecoli_stack = []
@@ -56,19 +56,20 @@ def interference_ode(t, y, e_g, e_d, d_g, d_d, s_d, t_g, rt):
     d_siRNA = 20 * d_d * dsRNA - s_d * siRNA              # 20 sites in dsRNA to become siRNA
     d_risc = s_d * siRNA                                  # 1 siRNA = 1 RISC 
 
+    rt = 1 + 0.012 / 10 * (t // 5)
+
     if t > start_infection:
         half_life = np.log(2)/6.395             # half life of 6.395 minutes for mRNA
         diff = tswv - risc                      # difference between tswv and risc
         
-        # if tswv more than risc
-        if diff > 0:                            
-            d_tswv = - (risc)
+        # if tswv more than risc by 20 percent
+        if diff > risc:          
+            d_tswv = - (risc) * 1.2
         else:
             tswv_2_risc = tswv/risc
-            d_tswv = (t_g * tswv - half_life * tswv - risc * tswv_2_risc * 1.001) #* (1 - (tswv/limit_tswv))
+            d_tswv = (t_g * tswv - half_life * tswv - risc * tswv_2_risc * rt) 
     else:
         d_tswv = 0     
-
     if tswv < 0:
         d_tswv = 0
     
@@ -94,12 +95,13 @@ ax[1, 1].plot(solution.t, solution.y[3], label="RISC", color='red')
 ax[1, 1].set_title('RISC')
 ax[2, 0].plot(solution.t, solution.y[4], label="TSWV", color='purple')
 ax[2, 0].set_title('TSWV')
-ax[2, 1].plot(solution.t, solution.y[0], label="Ecoli")
-ax[2, 1].plot(solution.t, solution.y[1], label="dsRNA")
-ax[2, 1].plot(solution.t, solution.y[2], label="siRNA")
-ax[2, 1].plot(solution.t, solution.y[3], label="RISC")
-ax[2, 1].plot(solution.t, solution.y[4], label="TSWV")
-ax[2, 1].set_title('Everything')
+# This is to show the trend of the graphs
+ax[2, 1].plot(solution.t, solution.y[0]/np.max(solution.y[0]), label="Ecoli")
+ax[2, 1].plot(solution.t, solution.y[1]/np.max(solution.y[1]), label="dsRNA")
+ax[2, 1].plot(solution.t, solution.y[2]/np.max(solution.y[2]), label="siRNA")
+ax[2, 1].plot(solution.t, solution.y[3]/np.max(solution.y[3]), label="RISC")
+ax[2, 1].plot(solution.t, solution.y[4]/np.max(solution.y[4]), label="TSWV")
+ax[2, 1].set_title('Everything with respect to their percetage')    
 ax[2, 1].legend(loc="upper left")
 fig.suptitle('mRNA Interference')
 plt.show()
